@@ -1,8 +1,9 @@
 <?php
-require('db.php');
+require('Config/database.php');
 session_start();
 $rand = rand(9999, 1000);
 $error = '';
+$validate = '';
 
 // cek cookie
 if (isset($_COOKIE['id']) && isset($_COOKIE['key'])) {
@@ -20,7 +21,7 @@ if (isset($_COOKIE['id']) && isset($_COOKIE['key'])) {
 
 
 if (isset($_SESSION["login"])) {
-    header("location: login.php");
+    header("location: index.php");
     exit;
 }
 
@@ -35,15 +36,18 @@ if (isset($_POST['login'])) {
 
     // Vaslidasi captcha
     if ($captcha != $confirmcaptcha) {
-        echo "<div class='alert alert-danger alert-dismissible fade show' role='alert' style='width: 400px; text-align:center; margin-left: 485px; margin-top:15px; position:fixed;'>
-        <strong> Captcha Salah </strong> ULANG!.
-        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-        </div>";
+        // echo "<div class='alert alert-danger alert-dismissible fade show' role='alert' style='width: 400px; text-align:center; margin-left: 485px; margin-top:15px; position:fixed;'>
+        // <strong> Captcha Salah </strong> ULANG!.
+        // <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+        // </div>";
         // echo "<div class='alert alert-danger' role='alert' style='width: 300px; text-align:center; margin-left:530px; margin-top:15px; position:fixed;'>
         // Invalid Captcha Code!
         // </div>";
+        $error = "captcha salah!";
+        $validate = 'captcha salah!';
+        
     } else {
-        $result = mysqli_query($conn, "SELECT * FROM account WHERE username = '$username'");
+        $result = mysqli_query($conn, "SELECT * FROM account WHERE username = '" .$username. "'");
         $hitung = mysqli_num_rows($result);
         $pwd = mysqli_fetch_array($result);
 
@@ -66,16 +70,22 @@ if (isset($_POST['login'])) {
                 }
                 header("location: index.php");
             } else {
-                echo "<div class='alert alert-danger alert-dismissible fade show' role='alert' style='width: 400px; text-align:center; margin-left: 485px; margin-top:15px; position:fixed;'>
-        <strong>Incorrect password or username!</strong> Enter Again.
-        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-        </div>";
+        //         echo "<div class='alert alert-danger alert-dismissible fade show' role='alert' style='width: 400px; text-align:center; margin-left: 485px; margin-top:15px; position:fixed;'>
+        // <strong>Incorrect password or username!</strong> Enter Again.
+        // <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+        // </div>";
+        $error = "username/password salah!";
+        $validate = 'username/password salah!';
+        
+        
             }
         } else {
-            echo "<div class='alert alert-danger alert-dismissible fade show' role='alert' style='width: 400px; text-align:center; margin-left: 485px; margin-top:15px; position:fixed;'>
-            <strong>Incorrect password or username!</strong> Enter Again.
-            <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-            </div>";
+            // echo "<div class='alert alert-danger alert-dismissible fade show' role='alert' style='width: 400px; text-align:center; margin-left: 485px; margin-top:15px; position:fixed;'>
+            // <strong>Incorrect password or username!</strong> Enter Again.
+            // <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+            // </div>";
+            $error = "username/password salah!";
+        $validate = 'username/password salah!';
         }
     }
 }
@@ -83,41 +93,46 @@ if (isset($_POST['login'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  
+
     <title>Login Page</title>
- 
+
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    
-    <link rel = "stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
-    
+
 </head>
+
 <body>
-    <div class="background">
-        <div class="shape"></div>
-        <div class="shape"></div>
-    </div>
-    <form>
+    <form action="" method="post">
         <h3>Login Admin</h3>
 
+        <?php if ($error != '') { ?>
+            <div class="alert alert-danget" role="alert"> <?= $error; ?> </div>
+        <?php } ?>
+
         <label for="username">Username</label>
-        <input type="text" placeholder="Email or Phone" id="username">
+        <input type="text" placeholder="Email or Phone" id="username" name="username" required>
 
         <label for="password">Password</label>
-        <input type="password" placeholder="Password" id="password">
+        <input type="password" placeholder="Password" id="password" name="password" required> 
 
         <label for="captcha"> Captcha </label>
-        <input type="text" class="captcha" name="captcha" style="pointer-events: none;" value="<?php echo substr(uniqid(), 8);?>"></input>
+        <input type="text" class="captcha" name="captcha" style="pointer-events: none;" value="<?php echo substr(uniqid(), 8); ?>"></input>
 
-         <label for="capthca"> Enter Capthca </label>
-                        <input type="text" name="confirmcaptcha" id="captcha" required data_parsley_trigger="keyup" value="" required>
-                        <input type="hidden" name="captcha-rand" value="<?php echo $rand; ?>">
+        <label for="capthca"> Enter Capthca </label>
+        <input type="text" name="confirmcaptcha" id="captcha" required data_parsley_trigger="keyup" value="" required>
+        <input type="hidden" name="captcha-rand" value="<?php echo $rand; ?>">
 
-        <button>Log In</button>
+        <button type="submit" name="login" id="login">Log In</button>
         <div class="form-footer mt-4">
-                <a href="register.php">Daftar di sini!</a>
-            </div>
+            <a href="daftar.php">Daftar di sini!</a>
+        </div>
     </form>
+    <script src="asset/js/captcha.js"></script>
+    <script src="asset/js/jquery.js"></script>
 </body>
+
 </html>

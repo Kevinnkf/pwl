@@ -1,26 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-	<link rel="stylesheet" href="Asset/Css/style.css">
-    <title>Registration Page</title>
+    <title>Login Page</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
 </head>
+
 <body>
-<?php 
-    require('db.php');
+    <?php
+    require('Config/database.php');
     session_start();
-    
+
     $error = '';
     $validate = '';
-    if(isset($_SESSION['user']) ) header('Location: index.php');
-    
-    if(isset($_POST['submit']) ){
+    if (isset($_SESSION['user'])) header('Location: index.php');
+
+    if (isset($_POST['submit'])) {
         $username = stripslashes($_POST['username']);
         $username = mysqli_real_escape_string($conn, $username);
-        $name = stripslashes($_POST['name']);
-        $name = mysqli_real_escape_string($conn, $name);
         $email = stripslashes($_POST['email']);
         $email = mysqli_real_escape_string($conn, $email);
         $password = stripslashes($_POST['password']);
@@ -28,78 +26,64 @@
         $repass = stripslashes($_POST['repassword']);
         $repass = mysqli_real_escape_string($conn, $repass);
 
-        if(!empty(trim($name)) && !empty(trim($username)) && !empty(trim($email)) && !empty(trim($password)) && !empty(trim($repass))){
-            if($password == $repass){
-                if(cek_nama($name, $conn) == 0){
+        if (!empty(trim($username)) && !empty(trim($email)) && !empty(trim($password)) && !empty(trim($repass))) {
+            if ($password == $repass) {
+                if (cek_nama($username, $conn) == 0) {
                     $pass = password_hash($password, PASSWORD_DEFAULT);
-                    $query = "INSERT INTO users (username, name, email, password) VALUES ('$username', '$nama', '$email', '$pass')";
+                    $query = "INSERT INTO account (username, email, password) VALUES ('" . $username . "', '" . $email . "', '" . $pass . "')";
                     $result = mysqli_query($conn, $query);
-                    if($result){
+                    if ($result) {
                         $_SESSION['username'] = $username;
-                        header('Location: loginn.php');
-                    } else{
+                        header('Location: login.php');
+                    } else {
                         $error =  'Register user gagal!';
                     }
-                } else{
+                } else {
                     $error = 'Username sudah terdaftar!';
                 }
-            } else{
+            } else {
                 $validate = 'Password tidak sama!';
             }
-        } else{
+        } else {
             $error = "Data tidak boleh kosong";
         }
-
     }
-    function cek_nama($username, $conn){
+    function cek_nama($username, $conn)
+    {
         $nama = mysqli_real_escape_string($conn, $username);
-        $query = "SELECT * FROM users WHERE username = '$nama'";
-        if($result = mysqli_query($conn, $query)) return mysqli_num_rows($result);
+        $query = "SELECT * FROM account WHERE username = '$nama'";
+        if ($result = mysqli_query($conn, $query)) return mysqli_num_rows($result);
     }
     ?>
-<section class="container-fluid mb-4" >
-    <section class="row justify-content-center">
-        <section class="col-12 col-sm-6 col-md-4">
-            <form class="form-container" action="register.php" method="POST">
-                <h4 class="text-center font-weigth-bold"> SIGN UP </h4>
-                <?php if($error != ''){ ?>
-                        <div class="alert alert-danger" role="alert"> <?= $error; ?>  </div>
-                <?php } ?>
+    <form action="daftar.php" method="post">
+        <h3>Register Admin</h3>
 
-                <div class="form-group">
-                    <label for="name"> Nama </label>
-                    <input type="text" class="form-control" name="name" id="name" placeholder="Masukan Nama anda">
-                </div>
-                <div class="form-group">
-                    <label for="InputEmail"> Email </label>
-                    <input type="email" class="form-control" name="email" aria-describedby="emailHelp" id="InputEmail" placeholder="Masukan Email anda">
-                </div>  
-                <div class="form-group">
-                    <label for="username"> Username </label>
-                    <input type="text" class="form-control" name="username" id="username" placeholder="Masukan Username anda">
-                </div>
-                <div class="form-group">
-                    <label for="name"> Password </label>
-                    <input type="password" class="form-control" name="password" id="InputPassword" placeholder="Masukan Password anda">
-                    <?php if($validate != ''){?>
-                        <p class="text-danger"> <?=$validate;?> </p>
-                    <?php } ?>
-                </div>
-                <div class="form-group">
-                    <label for="name"> Password </label>
-                    <input type="password" class="form-control" name="repassword" id="InputRePassword" placeholder="Re-password">
-                    <?php if($validate != ''){?>
-                        <p class="text-danger"> <?=$validate;?> </p>
-                    <?php } ?>
-                </div>
-                <button type="submit" name="submit" class="btn btn-primary btn-block"> Register </button>
-                <div class="form-footer mt-2"> 
-                    <p> Sudah punya account?</p>
-                    <a href="login.php"> Login Disini!</a>
-                </div>
-            </form>
-        </section>
-    </section>
-</section>
+        <?php if ($error != '') { ?>
+            <div class="alert alert-danget" role="alert"> <?= $error; ?> </div>
+        <?php } ?>
+
+        <label for="email"> Email </label>
+        <input type="email" class="form-control" placeholder="Email" id="InputEmail" name="email">
+
+        <label for="username">Username</label>
+        <input type="text" class="form-control" placeholder="Username" id="username" name="username">
+
+        <label for="password">Password</label>
+        <input type="password" class="form-control" placeholder="Password" id="InputPassword" name="password">
+        <?php if ($validate != '') { ?>
+            <p class="text-danger"> <?= $validate; ?> </p>
+        <?php } ?>
+
+        <label for="password"> RePassword</label>
+        <input type="password" class="form-control" placeholder="Password" id="InputRePassword" name="repassword">
+        <?php if ($validate != '') { ?>
+            <p class="text-danger"> <?= $validate; ?> </p>
+        <?php } ?>
+
+        <button type="submit" name="submit" id="submit">Register</button>
+        <div class="form-footer mt-4">
+            <a href="login.php">Masuk di sini!</a>
+        </div>
+    </form>
 </body>
 </html>
